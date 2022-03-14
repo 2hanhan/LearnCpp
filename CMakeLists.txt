@@ -86,15 +86,22 @@ endif()
 # examples
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Examples/bin)
 
-
+# boost库序列化操作
 add_executable(useboost
         Examples/boost/useboost.cc)
 target_link_libraries(useboost ${PROJECT_NAME})
 
+# yaml文件参数读取
 add_executable(readyaml
         Examples/yaml/readyaml.cc)
 target_link_libraries(readyaml ${PROJECT_NAME})
 
+#eigen3 库的使用
 add_executable(useeigen
         Examples/eigen/useeigen.cc)
 target_link_libraries(useeigen ${PROJECT_NAME})
+
+# c++ 调用python
+add_executable(usepython
+        Examples/python/usepython.cc)
+target_link_libraries(usepython -lpython3.6m)

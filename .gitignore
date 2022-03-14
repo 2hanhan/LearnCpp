@@ -1,5 +1,7 @@
 /build
 /Examples/bin
+/Examples/python/__pycache__
+/Examples/python/model
 /lib
 /Save
 /Thirdparty/DBoW2/build
