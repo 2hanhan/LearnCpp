@@ -9,10 +9,14 @@
  *
  */
 #include <iostream>
-#include <python3.6/Python.h>
+#include <Python.h>
+//#include <python3.6/Python.h>
 
 int main()
 {
+
+    // - 基础的调用
+
     // 初始化Python
     //在使用Python系统前，必须使用Py_Initialize对其
     //进行初始化。它会载入Python的内建模块并添加系统路
@@ -32,10 +36,10 @@ int main()
     PyRun_SimpleString("import sys");
     // PyRun_SimpleString("print '---import sys---'");
     //下面这个./表示当前运行程序的路径，如果使用../则为上级路径，根据此来设置
-    PyRun_SimpleString("sys.path.append('./Examples/python')");
-
+    PyRun_SimpleString("sys.path.append('./Examples/python/')");
+    PyRun_SimpleString("print(sys.path)");
     // - 引入模块
-    PyObject *pModule, *pDict; // python的对象的指针
+    PyObject *pModule, *pDict, *preturn; // python的对象的指针
     //要调用的python文件名
     pModule = PyImport_ImportModule("testpy"); //加载模型不用加后缀名.py
     if (!pModule)
@@ -90,21 +94,32 @@ int main()
     PyObject *pInstance = PyInstanceMethod_New(pClass);
     //调用类的方法
     PyRun_SimpleString("print('调用class中Method')");
-    result = PyObject_CallMethod(pInstance, "SayHello", "(Oss)", pInstance, "zyh","12");
+    result = PyObject_CallMethod(pInstance, "SayHello", "(Oss)", pInstance, "zyh", "12");
     //输出返回值
     char *name = NULL;
     PyRun_SimpleString("print('输出返回结果')");
     PyArg_Parse(result, "s", &name);
     printf("%s\n", name);
 
+    // - 使用文件路径传递图像参数
+    pFunc = PyDict_GetItemString(pDict, "show_image"); //从字典创建python函数对象
+    pArg = Py_BuildValue("(s)", "Data/db1.jpg");
+    preturn = PyEval_CallObject(pFunc, pArg);
+    name = NULL;
+    PyArg_Parse(preturn, "s", &name);
+    printf("%s\n", name);
+
     Py_DECREF(pModule);
     Py_DECREF(pDict);
     Py_DECREF(pFunc);
+    Py_DECREF(pArg);
     Py_DECREF(result);
     Py_DECREF(pClass);
     Py_DECREF(pInstance);
+    Py_DECREF(preturn);
     //释放python
     Py_Finalize();
-    //getchar();
+    // getchar();
+
     return 0;
 }

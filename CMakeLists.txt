@@ -102,6 +102,16 @@ add_executable(useeigen
 target_link_libraries(useeigen ${PROJECT_NAME})
 
 # c++ 调用python
+find_package(PythonLibs REQUIRED)
+include_directories(${PYTHON_INCLUDE_DIRS})
 add_executable(usepython
         Examples/python/usepython.cc)
-target_link_libraries(usepython -lpython3.6m)
+target_link_libraries(usepython ${PYTHON_LIBRARIES})
+#cv::Mat的格式转化
+find_package(Python3 3.6 COMPONENTS Interpreter NumPy REQUIRED)
+add_executable(cvmat2py
+        Examples/python/cvmat2py.cc)
+target_link_libraries(cvmat2py 
+${PROJECT_NAME}
+${PYTHON_LIBRARIES}
+Python3::NumPy)

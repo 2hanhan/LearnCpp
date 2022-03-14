@@ -21,6 +21,7 @@ class Test:
 ## 头文件包含
 ```c++
 #include <python3.6/Python.h>//应该是调用什么版本解使用什么版本的python
+#include <Python.h>//使用的方式和cmakelist有些关系
 ```
 ## 初始化python调用
 ```c++
@@ -67,6 +68,13 @@ result = PyObject_CallMethod(pInstance, "SayHello", "(Os)", pInstance, "Charity"
 add_executable(usepython
         Examples/python/usepython.cc)
 target_link_libraries(usepython -lpython3.6m)
+##写法2还是用下面这种吧，这样头文件包含就可以直接#include <Python.h>不用指定python版本
+#下面这种写法写可以
+find_package(PythonLibs REQUIRED)
+include_directories(${PYTHON_INCLUDE_DIRS})
+add_executable(usepython
+        Examples/python/usepython.cc)
+target_link_libraries(usepython ${PYTHON_LIBRARIES})
 ```
 ## Example
 简单的调用例子如下
@@ -74,3 +82,11 @@ target_link_libraries(usepython -lpython3.6m)
 [python](testpy.py)
 ## c++ python的数据类型转化
 ### 图像数据格式cv::Mat传递
+```c++
+```
+
+
+## 一些奇怪的错误
+### python程序中
+1. `import cv2`放在`python`文件中，没有缩进就会直接报错，放在函数内部就不会出现错误，后来有没有这个问题了，可能是`c++`写example的时候使用`{}`分别引入两次python导致的？？`{}`不是会自己提供作用阈吗？，还是这个接口是全局的?
+2. 之前使用`c++`多线程开`cv::imshow()`程序会崩溃，没想到用`c++`自己用一个`cv::imshow()`,然后python也开一个`cv.imshow()`也会崩溃。啊这当时还以为`cv::Mat`转为`PyObject`的格式出了问题呢，结果不是的。

@@ -1,4 +1,5 @@
-print("dadada")
+import sys
+import cv2
 
 
 def Hello(s):
@@ -17,5 +18,13 @@ class Test:
         print("Init")
 
     def SayHello(self, name, old):
-        print("Hello,", name,old)
+        print("Hello,", name, old)
         return name
+
+
+def show_image(name):
+    print(name)
+    image = cv2.imread(name)
+    cv2.imshow("image", image)
+    cv2.waitKey(0)
+    return name
