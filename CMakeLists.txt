@@ -102,7 +102,7 @@ add_executable(useeigen
 target_link_libraries(useeigen ${PROJECT_NAME})
 
 # c++ 调用python
-#set(PYTHON_INCLUDE_DIR /usr/include/python3.6)#这个好像并不影响
+set(PYTHON_INCLUDE_DIR /usr/include/python3.6)#这个好像并不影响
 #python的虚拟环境，需要添加对应的.so，bash中 source /venv/bin/activate
 set(PYTHON_LIBRARY /usr/lib/python3.6/config-3.6m-x86_64-linux-gnu/libpython3.6.so)
 find_package(PythonLibs REQUIRED)
