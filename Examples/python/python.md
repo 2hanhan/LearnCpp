@@ -60,7 +60,7 @@ PyObject *pInstance = PyInstanceMethod_New(pClass);//创建class的object
 result = PyObject_CallMethod(pInstance, "SayHello", "(Os)", pInstance, "Charity");
 ```
 
-## 相关链接CMakeLists.txt
+## 链接CMakeLists.txt
 ```CMake
 #看到有人添加
 #include_directories( /usr/include/python3.6)
