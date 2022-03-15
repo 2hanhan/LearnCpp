@@ -123,4 +123,5 @@ add_executable(useNet
 Examples/python/useNet.cc)
 target_link_libraries(useNet
 ${PYTHON_LIBRARIES}
-${PROJECT_NAME})
+${PROJECT_NAME}
+Python3::NumPy)

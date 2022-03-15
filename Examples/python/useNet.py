@@ -31,12 +31,12 @@ class HFNet:
         print("python初始化完成")
 
     def inference(self, image_name="test.jpg"):
-        nms_radius=4
-        num_keypoints=2000
-        print("提取",image_name,"特征")
+        nms_radius = 4
+        num_keypoints = 1500
+        print("提取", image_name, "特征")
         image = cv2.imread(image_name)
         #cv2.imshow(image_name, image)
-        #cv2.waitKey(3)
+        # cv2.waitKey(3)
         inputs = {
             self.image_ph: image[..., ::-1].astype(np.float),
             self.nms_radius_op: nms_radius,
@@ -55,4 +55,10 @@ if __name__ == "__main__":
     hfnet = HFNet(model_path)
     print("hfnet")
     image_name = "Data/db1.jpg"
-    result = hfnet.inference(image_name)
+    globalDes, keypoints, localDes = hfnet.inference(image_name)
+    #for i in globalDes:
+    #    print(i)
+    for i in keypoints:
+        print(i)
+    for i in localDes:
+        print(i)
