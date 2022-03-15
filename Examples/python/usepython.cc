@@ -86,7 +86,7 @@ int main()
     std::cout << "a + b = c =" << c << std::endl;
 
     // - 通过字典属性获取模块中的类
-    PyRun_SimpleString("print('通过字典属性获取模块中的class')");
+    PyRun_SimpleString("print('---------通过字典属性获取模块中的class-----------')");
     PyObject *pClass = PyDict_GetItemString(pDict, "Test");
 
     //实例化获取的类
@@ -102,6 +102,7 @@ int main()
     printf("%s\n", name);
 
     // - 使用文件路径传递图像参数
+     PyRun_SimpleString("print('---------使用文件路径传递图像参数-----------')");
     pFunc = PyDict_GetItemString(pDict, "show_image"); //从字典创建python函数对象
     pArg = Py_BuildValue("(s)", "Data/db1.jpg");
     preturn = PyEval_CallObject(pFunc, pArg);

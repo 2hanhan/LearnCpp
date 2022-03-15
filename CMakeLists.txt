@@ -102,16 +102,25 @@ add_executable(useeigen
 target_link_libraries(useeigen ${PROJECT_NAME})
 
 # c++ 调用python
+#set(PYTHON_INCLUDE_DIR /usr/include/python3.6)#这个好像并不影响
+#python的虚拟环境，需要添加对应的.so，bash中 source /venv/bin/activate
+set(PYTHON_LIBRARY /usr/lib/python3.6/config-3.6m-x86_64-linux-gnu/libpython3.6.so)
 find_package(PythonLibs REQUIRED)
 include_directories(${PYTHON_INCLUDE_DIRS})
 add_executable(usepython
         Examples/python/usepython.cc)
 target_link_libraries(usepython ${PYTHON_LIBRARIES})
 #cv::Mat的格式转化
-find_package(Python3 3.6 COMPONENTS Interpreter NumPy REQUIRED)
+find_package(Python3 COMPONENTS Interpreter NumPy REQUIRED)
 add_executable(cvmat2py
         Examples/python/cvmat2py.cc)
 target_link_libraries(cvmat2py 
 ${PROJECT_NAME}
 ${PYTHON_LIBRARIES}
 Python3::NumPy)
+# c++ 调用python 网络传递参数
+add_executable(useNet 
+Examples/python/useNet.cc)
+target_link_libraries(useNet
+${PYTHON_LIBRARIES}
+${PROJECT_NAME})

@@ -54,7 +54,7 @@ int main()
     PyObject *pFunc2 = PyDict_GetItemString(pDict, "load_image_name");
     clock_t time_start, time_end;
     time_start = clock();
-    for (int i = 0; i < 1000; i++)
+    for (int i = 0; i < 10; i++)
     {
 
         // step 2 cv::Mat 转化为PyObject
@@ -67,7 +67,7 @@ int main()
     std::cout << "cv::Mat传递耗时：" << (time_end - time_start) * 1000 << "ms" << std::endl;
 
     time_start = clock();
-    for (int i = 0; i < 1000; i++)
+    for (int i = 0; i < 10; i++)
     {
 
         // step 2 字符串传递图像名
