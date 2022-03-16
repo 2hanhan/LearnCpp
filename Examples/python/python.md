@@ -117,7 +117,14 @@ target_link_libraries(usepython ${PYTHON_LIBRARIES})
 ### 图像数据格式cv::Mat传递
 ```c++
 ```
-
+### numpy数据格式转化
+- `numpy.ndarray`中的`numpy.float32、numpy.int32`转化为`c++`格式的数据
+- 使用以下函数遍历实现每个一维、二维数据的读取
+```c++
+*(float *)PyArray_GETPTR1(Py_global_desc, i);
+*(int *)PyArray_GETPTR1(Py_global_desc, i, j);
+```
+-具体的例子可以参考函数[useNet.cc中`void GetFeature()`](useNet.cc)
 
 ## 一些奇怪的错误
 1. `import cv2`放在`python`文件中，没有缩进就会直接报错，放在函数内部就不会出现错误，后来有没有这个问题了，可能是`c++`写example的时候使用`{}`分别引入两次python导致的？？`{}`不是会自己提供作用阈吗？，还是这个接口是全局的?
