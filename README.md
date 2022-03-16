@@ -16,19 +16,22 @@
 ## 学习cpp
 - 尝试一些slam的代码的lib
 - lib的链接参考[CMakeLists.txt](/CMakeLists.txt)都有注释应该没问题
-### 1、c++调用boost序列化存储
+### 1 c++调用boost序列化存储
 - [/Examples/boost/useboost.cc](/Examples/boost/useboost.cc)
 - [/include/lboost.h](/include/lboost.h)
 - [/src/lboost.cc](/src/lboost.cc)
-### 2、c++读取yaml文件
+### 2 c++读取yaml文件
 - [/Examples/yaml/readyaml.cc](/Examples/yaml/readyaml.cc)
-### 3、eigen3库的
+### 3 eigen3库的
 - [/Examples/eigen/useeigen.cc](/Examples/eigen/useeigen.cc)
-### 4、c++调用python
+### 4 c++调用python
 - [一些总结or吐槽](/Examples/python/python.md)
-#### 基础调用
+#### 4.1 基础调用
 - [/Examples/python/usepython.cc](/Examples/python/usepython.cc)
 - [/Examples/python/testpy.py](/Examples/python/testpy.py)
-#### 调用opencv传递cv::Mat参数
+#### 4.2 调用opencv传递cv::Mat参数
 - [/Examples/python/cvmat2py.cc](/Examples/python/cvmat2py.cc)
 - [/Examples/python/cvmat2py.py](/Examples/python/cvmat2py.py)
+#### 4.3 调用网络并传递参数参数
+- [/Examples/python/useNet.cc](/Examples/python/useNet.cc)
+- [/Examples/python/useNet.py](/Examples/python/useNet.py)
