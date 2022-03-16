@@ -32,7 +32,7 @@ class HFNet:
 
     def inference(self, image_name="test.jpg"):
         nms_radius = 4
-        num_keypoints = 1500
+        num_keypoints = 50
         print("提取", image_name, "特征")
         image = cv2.imread(image_name)
         #cv2.imshow(image_name, image)
@@ -58,7 +58,7 @@ if __name__ == "__main__":
     globalDes, keypoints, localDes = hfnet.inference(image_name)
     #for i in globalDes:
     #    print(i)
-    for i in keypoints:
-        print(i)
-    for i in localDes:
-        print(i)
+    #for i in keypoints:
+    #    print(i)
+    #for i in localDes:
+    #    print(i)
