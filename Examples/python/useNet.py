@@ -32,7 +32,7 @@ class HFNet:
 
     def inference(self, image_name="test.jpg"):
         nms_radius = 4
-        num_keypoints = 50
+        num_keypoints = 2000
         print("提取", image_name, "特征")
         image = cv2.imread(image_name)
         #cv2.imshow(image_name, image)

@@ -25,7 +25,7 @@
 #define HISTO_LENGTH 30
 #define TH_HIGH 100
 #define TH_LOW 100
-#define mfNNratio 0.6
+#define mfNNratio 0.8
 
 /**
  * @brief
@@ -67,6 +67,7 @@ void GetFeature(PyObject *Py_result,
                 std::vector<cv::KeyPoint> &keypoints,
                 cv::Mat &local_desc)
 {
+    // std::cout << "格式转化开始" << std::endl;
 
     PyArrayObject *Py_global_desc, *Py_keyPoints, *Py_local_desc;
     std::vector<std::vector<double>> array1;
@@ -76,8 +77,8 @@ void GetFeature(PyObject *Py_result,
 
     //将元组解开，如果只return 1个，则不需要
     PyArg_UnpackTuple(Py_result, "ref", 3, 3, &Py_global_desc, &Py_keyPoints, &Py_local_desc);
-
-    // - global_desc
+    // std::cout << "解开元组" << std::endl;
+    //  - global_desc
     /*全局描述子，大小是固定的
     npy_intp *Py_global_desc_shape = PyArray_DIMS(Py_global_desc);
     int global_desc_row = Py_global_desc_shape[0];
@@ -93,8 +94,8 @@ void GetFeature(PyObject *Py_result,
         pdata[i] = *(float *)PyArray_GETPTR1(Py_global_desc, i);
     }
     // std::cout << "global_desc转化完成" << std::endl;
-    //  - KeyPoints
-    //  ? HF-Net返回的是int类型的坐标，但是cv::KeyPoint中构造函数是接收的是float
+    //   - KeyPoints
+    //   ? HF-Net返回的是int类型的坐标，但是cv::KeyPoint中构造函数是接收的是float
     npy_intp *Py_keyPoints_shape = PyArray_DIMS(Py_keyPoints);
     int keyPoints_row = Py_keyPoints_shape[0];
     // int keyPoints_col = Py_keyPoints_shape[1];//一个keypoint点有2坐标位置
@@ -111,8 +112,8 @@ void GetFeature(PyObject *Py_result,
         keypoints.push_back(keypoint);
     }
     // std::cout << "KeyPoints转化完成" << std::endl;
-    //  - local_desc
-    // npy_intp *Py_local_desc_shape = PyArray_DIMS(Py_local_desc);
+    //   - local_desc
+    //  npy_intp *Py_local_desc_shape = PyArray_DIMS(Py_local_desc);
     local_desc.create(keyPoints_row, 256, CV_32F);
     // int local_desc_row = Py_local_desc_shape[0];
     // int local_desc_col = Py_local_desc_shape[1];
@@ -122,11 +123,11 @@ void GetFeature(PyObject *Py_result,
         float *pdata = local_desc.ptr<float>(i);
         for (int j = 0; j < 256; ++j)
         {
-            // std::cout << *(float *)PyArray_GETPTR2(Py_keyPoints, i, j) << " ";
-            float temp = *(float *)PyArray_GETPTR2(Py_keyPoints, i, j);
+            // std::cout << *(float *)PyArray_GETPTR2(Py_local_desc, i, j) << " ";
+            float temp = *(float *)PyArray_GETPTR2(Py_local_desc, i, j);
             pdata[j] = temp;
         }
-        // std::cout <<std::endl;
+        // std::cout << std::endl;
     }
     // std::cout << "local_desc转化完成" << std::endl;
 }
@@ -206,7 +207,7 @@ void drawmatch(cv::Mat img_1, cv::Mat img_2, std::vector<cv::KeyPoint> &keypoint
     // std::cout << "构建旋转直方图" << std::endl;
 
     // 匹配点对距离，注意是按照F2特征点数目分配空间
-    std::vector<int> vMatchedDistance(keypoints_2.size(), INT_MAX);
+    std::vector<int> vMatchedDistance(keypoints_2.size(), INT_MAX); //因为每一个只能匹配一次
     // 从帧2到帧1的反向匹配，注意是按照F2特征点数目分配空间
     std::vector<int> vnMatches21(keypoints_2.size(), -1);
     std::vector<cv::DMatch> matches;
@@ -237,7 +238,7 @@ void drawmatch(cv::Mat img_1, cv::Mat img_2, std::vector<cv::KeyPoint> &keypoint
             cv::Mat d2 = descriptors_2.row(i2);
             // 计算两个特征点描述子距离
             int dist = LocalDescriptorDistance(d1, d2);
-            //std::cout << "[" << dist << " " << LocalDescriptorDistance(d1, d2) << "]";
+            // std::cout << "[" << dist << " " << LocalDescriptorDistance(d1, d2) << "]";
 
             if (vMatchedDistance[i2] <= dist)
                 continue;
@@ -245,7 +246,6 @@ void drawmatch(cv::Mat img_1, cv::Mat img_2, std::vector<cv::KeyPoint> &keypoint
             // 如果当前匹配距离更小，更新最佳次佳距离
             if (dist < bestDist1)
             {
-
                 bestDist2 = bestDist1;
                 bestDist1 = dist;
                 bestIdx2 = i2;
@@ -256,31 +256,37 @@ void drawmatch(cv::Mat img_1, cv::Mat img_2, std::vector<cv::KeyPoint> &keypoint
             }
         }
 
-        if (bestDist1 <= TH_LOW)
+        if (bestDist1 <= TH_LOW) //优于绝对阈值
         {
-            if (static_cast<float>(bestDist1) < mfNNratio * static_cast<float>(bestDist2))
+            if (bestDist1 < (float)mfNNratio * bestDist2) //优于次佳一定比例
             {
+                if (vnMatches21[bestIdx2] >= 0) //原本与1中与2中的对应匹配点，被新的1中与2对应的匹配点取代了
+                {
+                    vnMatches12[vnMatches21[bestIdx2]] = -1;
+                    nmatches--;
+                }
+
+                vnMatches12[i1] = bestIdx2;
+                vnMatches21[bestIdx2] = i1;
+                vMatchedDistance[bestIdx2] = bestDist1;
+
+                // std::cout << "bestDist：[" << i1 << "," << bestIdx2 << "] dis:" << bestDist1<< keypoints_1[i1].pt << "<=>" << keypoints_2[bestIdx2].pt<< std::endl;
                 cv::DMatch temp;
-                temp.queryIdx = bestIdx2; // 2描述子的索引
-                temp.trainIdx = i1;       // 1描述子的索引
+                temp.queryIdx = i1;       // 1描述子的索引
+                temp.trainIdx = bestIdx2; // 2描述子的索引
                 matches.push_back(temp);  // ? 这个东西也没有返回啊，留着做匹配点的可视化吗
                 nmatches++;
             }
         }
     }
-    std::cout << "matches: " << matches.size() << std::endl; //输出匹配点的数目
-                                                             // //绘制结果
+    // std::cout << "matches.size: " << matches.size() << " k1:" << keypoints_1.size() << " k2:" << keypoints_2.size() << std::endl; //输出匹配点的数目
+    //绘制结果
     cv::Mat img_match;
-    // Mat img_goodmatches;
-    // BfMatch(descriptors_1, descriptors_2, matches);//调用BfMatch函数
     cv::drawMatches(img_1, keypoints_1, img_2, keypoints_2, matches, img_match);
-    // drawMatches(img_1, keypoints_1,img_2, keypoints_2,good_matches,img_goodmatches);
-
     cv::imshow("all matches", img_match);
-    // imshow("good matches", img_goodmatches);
-    // HF-Net提取特征点
-
-    cv::waitKey(2000);
+    cv::imwrite("Save/img_match.jpg", img_match);
+    cv::waitKey(100);
+    cv::destroyAllWindows();
 }
 
 int main(int argc, char **argv)
@@ -289,8 +295,8 @@ int main(int argc, char **argv)
     std::string data_path = "Data";
     std::string PathToquery, PathTodb;
     std::vector<std::string> querys, dbs;
-    PathToquery = "Data/query.txt";
-    PathTodb = "Data/db.txt";
+    PathToquery = "Data/query.txt"; //待查询图像
+    PathTodb = "Data/db.txt";       //搜索范围
     LoadImagesName(data_path, PathToquery, querys);
     LoadImagesName(data_path, PathTodb, dbs);
     cv::Mat image_query;
@@ -321,9 +327,24 @@ int main(int argc, char **argv)
     cv::Mat local_desc2;
     //用于匹配画图的
     cv::Mat global_desc1;
-    global_desc2.create(4096, 1, CV_32F);
+    global_desc1.create(4096, 1, CV_32F);
     std::vector<cv::KeyPoint> keypoints1;
     cv::Mat local_desc1;
+    /*
+    image_query = cv::imread(querys[0]);
+    const char *image_name1 = querys[0].data();
+    result1 = PyObject_CallMethod(pInstance, "inference", "s", image_name1);
+    keypoints1.clear();
+    GetFeature(result1, global_desc1, keypoints1, local_desc1);
+
+    image_db = cv::imread(dbs[3]);
+    const char *image_name2 = dbs[3].data();
+    result2 = PyObject_CallMethod(pInstance, "inference", "s", image_name2);
+    keypoints2.clear();
+    GetFeature(result2, global_desc2, keypoints2, local_desc2);
+
+    drawmatch(image_query, image_db, keypoints1, keypoints2, local_desc1, local_desc2);
+    */
 
     // step 2 根据图像名称遍历读取
     for (int i = 0; i < querys.size(); ++i)
@@ -361,7 +382,7 @@ int main(int argc, char **argv)
         }
         std::cout << "image_query" << i + 1 << " <=> image_db" << best_dbs + 1 << std::endl;
         image_db = cv::imread(dbs[best_dbs]);
-        drawmatch(image_query, image_query, keypoints, keypoints1, local_desc, local_desc1);
+        drawmatch(image_query, image_db, keypoints, keypoints1, local_desc, local_desc1);
         //  cv::destroyAllWindows();
     }
 
