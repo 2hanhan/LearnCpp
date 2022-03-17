@@ -56,7 +56,9 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 
 add_library(${PROJECT_NAME} SHARED
 src/lboost.cc
-include/lboost.h)
+src/Optimizer.cc
+include/lboost.h
+include/Optimizer.h)
 
 
 target_link_libraries(${PROJECT_NAME}
@@ -125,3 +127,8 @@ target_link_libraries(useNet
 ${PYTHON_LIBRARIES}
 ${PROJECT_NAME}
 Python3::NumPy)
+
+# g2o 使用
+add_executable(useg2o
+        Examples/g2o/useg2o.cc)
+target_link_libraries(useg2o ${PROJECT_NAME})

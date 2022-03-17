@@ -116,6 +116,20 @@ target_link_libraries(usepython ${PYTHON_LIBRARIES})
 ## c++ python的数据类型转化
 ### 图像数据格式cv::Mat传递
 ```c++
+PyObject *cvmat2py(cv::Mat &image)
+{
+    import_array();
+    int row, col;
+    col = image.cols; //列宽
+    row = image.rows; //行高
+    int channel = image.channels();
+    int irow = row, icol = col * channel;
+    npy_intp Dims[3] = {row, col, channel}; //图像维度信息
+    PyObject *pyArray = PyArray_SimpleNewFromData(channel, Dims, NPY_UBYTE, image.data);
+    PyObject *ArgArray = PyTuple_New(1);
+    PyTuple_SetItem(ArgArray, 0, pyArray);
+    return ArgArray;
+}
 ```
 ### numpy数据格式转化
 - `numpy.ndarray`中的`numpy.float32、numpy.int32`转化为`c++`格式的数据
