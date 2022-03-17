@@ -22,7 +22,7 @@
 - [/src/lboost.cc](/src/lboost.cc)
 ### 2 c++读取yaml文件
 - [/Examples/yaml/readyaml.cc](/Examples/yaml/readyaml.cc)
-### 3 eigen3库的
+### 3 eigen3库使用
 - [/Examples/eigen/useeigen.cc](/Examples/eigen/useeigen.cc)
 ### 4 c++调用python
 - [一些总结or吐槽](/Examples/python/python.md)
