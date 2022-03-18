@@ -45,8 +45,8 @@ int n = 0;
 // 创建边
 g2o::EdgeSE3ProjectXYZ* edge = new g2o::EdgeSE3ProjectXYZ();
 //一个边的两个头一个连接SE3、一个连接Point
-edge->setVertex(0,dynamic_cast<g2o::OptimizableGraph::Vertex*>(optimizer.vertex(j)));
-edge->setVertex(1, dynamic_cast<g2o::OptimizableGraph::Vertex*>(optimizer.vertex(i)));
+edge->setVertex(0,dynamic_cast<g2o::OptimizableGraph::Vertex*>(optimizer.vertex(j)));//point
+edge->setVertex(1, dynamic_cast<g2o::OptimizableGraph::Vertex*>(optimizer.vertex(i)));//SE3
 //设置观测
 edge->setMeasurement(Eigen::Matrix<double,2,1>());
 //设置信息矩阵
@@ -60,7 +60,7 @@ optimizer.addEdge(edge);
 ```
 ### step 4 开始优化
 ```c++
-optimizer.setVerbose(true);//true会输出一些额外的信息
+optimizer.setVerbose(true);//true会输出一些额外调试的信息
 optimizer.initializeOptimization();
 optimizer.optimize(nIterations);
 ```
@@ -73,6 +73,64 @@ g2o::SE3Quat SE3quat = vSE3->estimate();
 g2o::VertexSBAPointXYZ* vPoint = static_cast<g2o::VertexSBAPointXYZ*>(optimizer.vertex(j));
 ```
 ## 各个参数的含义作用
+### 优化器
+1. 稀疏优化器
+```c++
+g2o::SparseOptimizer optimizer;
+```
+### 求解器
+#### 线性求解器
+1. camera的`SE3`6自由度位姿,point的位置`x,y,z`3自由度
+```c++
+g2o::BlockSolver_6_3::LinearSolverType * linearSolver = new g2o::LinearSolverEigen<g2o::BlockSolver_6_3::PoseMatrixType>();
+```
+2. camera的`Sim3`6自由度位姿+1尺度，point的位置`x,y,z`3自由度
+```c++
+g2o::BlockSolver_7_3::LinearSolverType *linearSolver = new g2o::LinearSolverEigen<g2o::BlockSolver_7_3::PoseMatrixType>();
+```
+### 待优化参数设置
+1. camera的`SE3`6自由度位姿，point的位置`x,y,z`3自由度
+```c++
+g2o::BlockSolver_6_3 * solver_ptr = new g2o::BlockSolver_6_3(linearSolver);
+```
+2. camera的`Sim3`6自由度位姿+1尺度，point的位置`x,y,z`3自由度
+```c++
+g2o::BlockSolver_7_3 *solver_ptr = new g2o::BlockSolver_7_3(linearSolver);
+```
+### 迭代下降算法
+1. LM下降算法
+```c++
+g2o::OptimizationAlgorithmLevenberg* solver = new g2o::OptimizationAlgorithmLevenberg(solver_ptr);
+```
+2. GaussNewton下降算法
+```c++
+g2o::OptimizationAlgorithmGaussNewton* solver = new g2o::OptimizationAlgorithmGaussNewton(solver_ptr);
+```
+### 顶点设置
+1. camera的`SE3`6自由度位姿
+```c++
+g2o::VertexSE3Expmap *vSE3 = new g2o::VertexSE3Expmap();
+```
+2. camera的`Sim3`6自由度位姿+1尺度
+```c++
+g2o::VertexSim3Expmap *vSim3 = new g2o::VertexSim3Expmap();
+// 可以设置固定尺度
+vSim3->_fix_scale = true;
+```
+### 边设置
+1. 连接`SE3`与`x,y,z`的边
+```c++
+g2o::EdgeSE3ProjectXYZ* edge = new g2o::EdgeSE3ProjectXYZ();
+edge->setVertex(0, dynamic_cast<g2o::OptimizableGraph::Vertex *>(optimizer.vertex(id)));//point
+edge->setVertex(1, dynamic_cast<g2o::OptimizableGraph::Vertex *>(optimizer.vertex(pKFi->mnId)));//SE3
+```
+2. 连接`Sim3`和`Sim3`的边
+```
+g2o::EdgeSim3 *edge = new g2o::EdgeSim3();
+edge->setVertex(0, dynamic_cast<g2o::OptimizableGraph::Vertex *>(optimizer.vertex(pKF1->mnId)));
+edge->setVertex(1, dynamic_cast<g2o::OptimizableGraph::Vertex *>(optimizer.vertex(pKF2->mnId)));
+```
+
 ### 核函数
 #### 作用
 1. 防止误差增长过大占得权重比较大，但是这个错误可能是个误匹配，为了优化这个边可能消耗过大算力，并且把整体带偏了。
