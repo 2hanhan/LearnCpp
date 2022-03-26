@@ -1,2 +1,11 @@
 /build
+/Examples/bin
+/Examples/python/__pycache__
+/Examples/python/model
+/lib
+/Save
+/Thirdparty/DBoW2/build
+/Thirdparty/g2o/build
+/Thirdparty/Sophus/build
+/Data
 /.vscode
