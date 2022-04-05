@@ -1,4 +1,9 @@
 # c++调用python
+- 依赖库
+```bash
+sudo apt-get install python-numpy
+```
+
 ## python文件
 `test.py`
 ```python
