@@ -113,7 +113,7 @@ add_executable(usepython
         Examples/python/usepython.cc)
 target_link_libraries(usepython ${PYTHON_LIBRARIES})
 #cv::Mat的格式转化
-find_package(Python3 COMPONENTS Interpreter NumPy REQUIRED)
+find_package(Python3 COMPONENTS Interpreter NumPy REQUIRED)#网上有人说python3.8能找到
 add_executable(cvmat2py
         Examples/python/cvmat2py.cc)
 target_link_libraries(cvmat2py 
@@ -132,3 +132,6 @@ Python3::NumPy)
 add_executable(useg2o
         Examples/g2o/useg2o.cc)
 target_link_libraries(useg2o ${PROJECT_NAME})
+
+
+add_subdirectory(/Examples/ceres)
