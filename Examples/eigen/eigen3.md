@@ -76,16 +76,96 @@ Eigen::Vector3d::UnitZ();  //x轴单位向量
 ## 旋转
 ### 旋转矩阵
 ```c++
-Eigen::Matrix3d R =Eigen::Matrix3d::Identity();
-R =  Q.toRotationMatrix()
+Eigen::Matrix3d rotation_matrix =Eigen::Matrix3d::Identity();
+
+// 旋转矩阵 => 旋转四元数
+Eigen::Quaterniond quaternion(rotation_matrix);
+
+Eigen::Quaterniond quaternion;
+quaternion = rotation_matrix;
+
+// 旋转矩阵 => 欧拉角(Z - Y - X，即Row、Pitch、Yaw)
+Eigen::Vector3d eulerAngle = rotation_matrix.eulerAngles(2, 1, 0);
+
+// 旋转矩阵 => 旋转向量
+Eigen::AngleAxisd rotation_vector(rotation_matrix);
+
+Eigen::AngleAxisd rotation_vector;
+rotation_vector = rotation_matrix;
+
+Eigen::AngleAxisd rotation_vector;
+rotation_vector.fromRotationMatrix(rotation_matrix);
 ```
 ### 旋转四元数
 ```c++
 double x,y,z,w;
-Eigen::Quaterniond Q(w,x,y,z);   
-Eigen::Quaterniond Q(R);   
+Eigen::Quaterniond quaternion(w, x, y, z);
+
+//  旋转四元数 => 旋转矩阵
+Eigen::Matrix3d rotation_matrix;
+rotation_matrix = quaternion.matrix();
+
+Eigen::Matrix3d rotation_matrix;
+rotation_matrix = quaternion.toRotationMatrix();
+
+//  旋转四元数 => 欧拉角(Z - Y - X，即Row、Pitch、Yaw)
+Eigen::Vector3d eulerAngle = quaternion.matrix().eulerAngles(2, 1, 0);
+
+//  旋转四元数 => 旋转向量
+Eigen::AngleAxisd rotation_vector(quaternion);
+
+Eigen::AngleAxisd rotation_vector;
+rotation_vector = quaternion;
 ```
 ### 欧拉角
+```c++
+Eigen::Vector3d eulerAngle(yaw, pitch, roll);
+
+// 欧拉角 => 四元数
+Eigen::AngleAxisd rollAngle(AngleAxisd(eulerAngle(2), Vector3d::UnitX()));
+Eigen::AngleAxisd pitchAngle(AngleAxisd(eulerAngle(1), Vector3d::UnitY()));
+Eigen::AngleAxisd yawAngle(AngleAxisd(eulerAngle(0), Vector3d::UnitZ()));
+Eigen::Quaterniond quaternion;
+quaternion = yawAngle * pitchAngle * rollAngle;
+
+// 欧拉角 => 旋转矩阵
+Eigen::AngleAxisd rollAngle(AngleAxisd(eulerAngle(2), Vector3d::UnitX()));
+Eigen::AngleAxisd pitchAngle(AngleAxisd(eulerAngle(1), Vector3d::UnitY()));
+Eigen::AngleAxisd yawAngle(AngleAxisd(eulerAngle(0), Vector3d::UnitZ()));
+Eigen::Matrix3d rotation_matrix;
+rotation_matrix = yawAngle * pitchAngle * rollAngle;
+
+
+// 欧拉角 => 旋转向量
+Eigen::AngleAxisd rollAngle(AngleAxisd(eulerAngle(2), Vector3d::UnitX()));
+Eigen::AngleAxisd pitchAngle(AngleAxisd(eulerAngle(1), Vector3d::UnitY()));
+Eigen::AngleAxisd yawAngle(AngleAxisd(eulerAngle(0), Vector3d::UnitZ()));
+Eigen::AngleAxisd rotation_vector;
+rotation_vector = yawAngle * pitchAngle * rollAngle;
+```
+### 旋转向量
+```c++
+Eigen::AngleAxisd rotation_vector(alpha, Vector3d(x, y, z));
+
+// 旋转向量 => 旋转矩阵
+Eigen::Matrix3d rotation_matrix;
+rotation_matrix = rotation_vector.matrix();
+
+Eigen::Matrix3d rotation_matrix;
+rotation_matrix = rotation_vector.toRotationMatrix();
+
+// 旋转向量 => 四元数
+Eigen::Quaterniond quaternion(rotation_vector);
+
+Eigen::Quaterniond quaternion;
+Quaterniond quaternion;
+
+Eigen::Quaterniond quaternion;
+quaternion = rotation_vector;
+
+// 旋转向量 => 欧拉角(Z - Y - X，即Row、Pitch、Yaw)
+Eigen::Vector3d eulerAngle = rotation_vector.matrix().eulerAngles(2, 1, 0);
+```
 
 # 数据类型转化
 ##  double数字转化为矩阵
