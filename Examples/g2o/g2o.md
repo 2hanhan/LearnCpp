@@ -117,6 +117,14 @@ g2o::VertexSim3Expmap *vSim3 = new g2o::VertexSim3Expmap();
 // 可以设置固定尺度
 vSim3->_fix_scale = true;
 ```
+添加顶点
+```c++
+vPoint->setEstimate(/*设置顶点的数值*/);
+vPoint->setId(/*顶点id*/);
+vPoint->setMarginalized(true);
+optimizer.addVertex(vPoint);//添加顶点
+```
+
 ### 边设置
 1. 连接`SE3`与`x,y,z`的边
 ```c++
@@ -136,8 +144,77 @@ edge->setVertex(1, dynamic_cast<g2o::OptimizableGraph::Vertex *>(optimizer.verte
 1. 防止误差增长过大占得权重比较大，但是这个错误可能是个误匹配，为了优化这个边可能消耗过大算力，并且把整体带偏了。
 #### 可选参数
 
+## 自定义误差Edge
+
+### 1元边
+定义1元边
+```c++
+class EdgeSE3
+    : public g2o::BaseUnaryEdge<3 /*误差项维度*/,
+                                CLASS_A /*观测量数据类型,可以是自定义数据类型*/,
+                                g2o::VertexSBAPointXYZ /*i顶点类型*/>
+{
+public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    EdgeSE3PrioriMapGICP();
+
+    virtual bool read(std::istream &) { return false; }
+    virtual bool write(std::ostream &) const { return false; }
+
+    void computeError()
+    {
+        _error =measurement()*111;//误差大小 measurement()等同于后边设置的观测的那个变量
+    }
+
+    void linearizeOplus()
+    {
+         _jacobianOplusXi = ; //对i顶点的导数
+    }
+};
+```
+设置Edge的连接
+```c++
+EdgeSE3 *e = new ORB_SLAM3::EdgeSE3();
+e->setVertex(0, dynamic_cast<g2o::OptimizableGraph::Vertex *>(optimizer.vertex())); //设置i顶点
+e->setMeasurement(/*观测量数据类型的变量*/);                                        //设置观测
+```
 
 
+### 2元边
+定义2元边
+```c++
+class EdgeSE3ProjectXYZ: public g2o::BaseBinaryEdge<2 /*误差项维度*/,
+                                 Eigen::Vector2d /*观测量数据类型*/,
+                                 g2o::VertexSBAPointXYZ /*i顶点类型*/,
+                                 g2o::VertexSE3Expmap /*j顶点类型*/>
+{
+public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    EdgeSE3ProjectXYZ();
+    bool read(std::istream &is);
+    bool write(std::ostream &os) const;
+    void computeError()
+    {
+
+        _error = ; //误差大小
+    }
+
+    void linearizeOplus()
+    {
+
+        _jacobianOplusXi = ; //对i顶点的导数
+
+        _jacobianOplusXj = ; //对j顶点的导数
+    }
+}
+```
+设置Edge的连接
+```c++
+EdgeSE3ProjectXYZ *e = new ORB_SLAM3::EdgeSE3ProjectXYZ();
+e->setVertex(0, dynamic_cast<g2o::OptimizableGraph::Vertex *>(optimizer.vertex())); //设置i顶点
+e->setVertex(1, dynamic_cast<g2o::OptimizableGraph::Vertex *>(optimizer.vertex())); //设置j顶点
+e->setMeasurement(/*观测量数据类型的变量*/);                                        //设置观测
+```
 
 
 
